@@ -80,7 +80,8 @@ const ReservationPage = {
             <!-- QR Code Success Modal -->
             <div id="qr-modal" style="display:none;">
                 <div class="modal-overlay" style="align-items:flex-start; padding-top:40px; overflow-y:auto;">
-                    <div class="modal-box" style="max-width:520px; text-align:center;">
+                    <div class="modal-box" style="max-width:520px; text-align:center; position:relative;">
+                        <button id="qr-modal-close" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:rgba(11,42,42,0.5); line-height:1;">&times;</button>
                         <h3 style="color:var(--success); margin-bottom:4px;">Reservation Confirmed!</h3>
                         <p style="margin-bottom:8px;">Your reservation code:</p>
                         <div id="qr-token" style="font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--deep-900); letter-spacing:0.1em; margin-bottom:20px;"></div>
@@ -100,7 +101,13 @@ const ReservationPage = {
         `;
     },
 
+    pricingRequestId: 0,
+
     async init() {
+        this.selectedRoom = null;
+        this.rooms = [];
+        this.pricingRequestId = 0;
+
         const today = new Date().toISOString().split('T')[0];
         $('#res-checkin').attr('min', today);
         $('#res-checkout').attr('min', today);
@@ -128,6 +135,10 @@ const ReservationPage = {
         });
 
         $('#submit-reservation').on('click', () => this.submitReservation());
+
+        $(document).off('click', '#qr-modal-close').on('click', '#qr-modal-close', () => {
+            $('#qr-modal').hide();
+        });
     },
 
     filterRooms() {
@@ -181,12 +192,17 @@ const ReservationPage = {
         }
         $('#date-info').text(`Duration: ${days} day${days > 1 ? 's' : ''}`);
 
+        const requestId = ++this.pricingRequestId;
+
         const res = await API.calculatePrice({
             room_id: this.selectedRoom.id,
             check_in: checkIn,
             check_out: checkOut,
             payment_type: paymentType,
         });
+
+        // Discard stale response if a newer request was fired
+        if (requestId !== this.pricingRequestId) return;
 
         if (!res.success) {
             $('#date-info').html(`<span style="color:var(--danger)">${res.message}</span>`);
@@ -262,6 +278,17 @@ const ReservationPage = {
 
         if (res.success) {
             this.showQRModal(res.data);
+            $btn.prop('disabled', false).text('Confirm Reservation');
+            // Reset form fields and state
+            $('#res-name').val('');
+            $('#res-phone').val('');
+            $('#res-checkin').val('');
+            $('#res-checkout').val('');
+            $('#res-capacity').val('');
+            $('#res-payment').val('Cash');
+            $('#room-cards').html('');
+            $('#pricing-section').hide();
+            this.selectedRoom = null;
         } else {
             $('#reservation-error').text(res.message);
             Toast.error(res.message);

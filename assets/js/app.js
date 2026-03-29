@@ -16,14 +16,30 @@ const App = {
         window.addEventListener('hashchange', () => this.navigate());
     },
 
+    currentPage: null,
+
     async navigate() {
         const hash = window.location.hash || '#/';
+
+        // Cleanup previous page if it has a cleanup/destroy method
+        if (this.currentPage && typeof this.currentPage.cleanup === 'function') {
+            this.currentPage.cleanup();
+        }
+        if (this.currentPage && typeof this.currentPage.destroy === 'function') {
+            this.currentPage.destroy();
+        }
+        this.currentPage = null;
 
         // Handle dynamic lookup route: #/lookup/TOKEN
         if (hash.startsWith('#/lookup/')) {
             const token = hash.replace('#/lookup/', '');
             $('#app').html(LookupPage.render());
-            await LookupPage.init(token);
+            this.currentPage = LookupPage;
+            try {
+                await LookupPage.init(token);
+            } catch (err) {
+                console.error('Page init error:', err);
+            }
             Header.updateActiveLink();
             window.scrollTo(0, 0);
             return;
@@ -46,9 +62,14 @@ const App = {
 
         const html = typeof page.render === 'function' ? page.render() : '';
         $('#app').html(html);
+        this.currentPage = page;
 
         if (typeof page.init === 'function') {
-            await page.init();
+            try {
+                await page.init();
+            } catch (err) {
+                console.error('Page init error:', err);
+            }
         }
 
         Header.updateActiveLink();

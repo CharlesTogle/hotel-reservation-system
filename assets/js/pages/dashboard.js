@@ -42,8 +42,11 @@ const DashboardPage = {
         if (!Header.currentUser || Header.currentUser.role !== 'admin') return;
 
         this.activeTab = 'reservations';
-        await this.loadStats();
-        await this.loadReservations();
+
+        // Fetch reservations once and share the data
+        const res = await API.getReservations();
+        this.renderStats(res);
+        this.renderReservations(res);
 
         $(document).off('click', '.dash-tab').on('click', '.dash-tab', (e) => {
             const tab = $(e.target).data('tab');
@@ -58,12 +61,11 @@ const DashboardPage = {
         });
     },
 
-    async loadStats() {
-        const res = await API.getReservations();
+    renderStats(res) {
         if (!res.success) return;
 
         const reservations = res.data;
-        const total = reservations.length;
+        const total = (res.pagination && res.pagination.total) ? res.pagination.total : reservations.length;
         const confirmed = reservations.filter(r => r.status === 'confirmed').length;
         const checkedIn = reservations.filter(r => r.status === 'checked_in').length;
         const revenue = reservations.reduce((sum, r) => sum + Number(r.total), 0);
@@ -88,6 +90,14 @@ const DashboardPage = {
         `);
     },
 
+    renderReservations(res) {
+        if (!res.success) {
+            $('#dash-content').html(`<div class="empty-state"><h3>Error</h3><p>${res.message}</p></div>`);
+            return;
+        }
+        this.showReservationsTable(res.data);
+    },
+
     async loadReservations() {
         $('#dash-content').html('<div class="loading"><div class="spinner"></div>Loading reservations...</div>');
 
@@ -97,8 +107,12 @@ const DashboardPage = {
             return;
         }
 
-        const reservations = res.data;
+        // Also update stats with the same data (no duplicate API call)
+        this.renderStats(res);
+        this.showReservationsTable(res.data);
+    },
 
+    showReservationsTable(reservations) {
         if (reservations.length === 0) {
             $('#dash-content').html(`
                 <div class="empty-state">
@@ -141,7 +155,7 @@ const DashboardPage = {
                     <td>${r.num_days}</td>
                     <td>${r.payment_type}</td>
                     <td>$${Number(r.total).toFixed(2)}</td>
-                    <td><span class="status ${r.status}">${r.status.replace('_', ' ')}</span></td>
+                    <td><span class="status ${r.status}">${r.status.replace(/_/g, ' ')}</span></td>
                     <td>
                         <select class="select small status-select" data-id="${r.id}" style="font-size:0.78rem; padding:6px 8px; margin-bottom:6px;">
                             <option value="confirmed" ${r.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
@@ -159,15 +173,20 @@ const DashboardPage = {
         $('#dash-content').html(tableHtml);
 
         $('.status-select').on('change', async function () {
-            const id = $(this).data('id');
-            const status = $(this).val();
+            const $select = $(this);
+            const id = $select.data('id');
+            const status = $select.val();
+
+            // Disable all status selects while update is in progress (#14)
+            $('.status-select').prop('disabled', true);
+
             const res = await API.updateReservation(id, status);
             if (res.success) {
                 Toast.success('Status updated');
-                DashboardPage.loadStats();
-                DashboardPage.loadReservations();
+                await DashboardPage.loadReservations();
             } else {
                 Toast.error(res.message);
+                $('.status-select').prop('disabled', false);
             }
         });
 
@@ -177,8 +196,7 @@ const DashboardPage = {
                 const res = await API.deleteReservation(id);
                 if (res.success) {
                     Toast.success('Reservation deleted');
-                    DashboardPage.loadStats();
-                    DashboardPage.loadReservations();
+                    await DashboardPage.loadReservations();
                 } else {
                     Toast.error(res.message);
                 }
@@ -289,7 +307,8 @@ const DashboardPage = {
             uploadText.text('Uploading...');
             statusEl.html('<span style="color:var(--accent-600);">Uploading...</span>');
 
-            const res = await API.uploadRoomImage(file);
+            const roomId = card.data('id');
+            const res = await API.uploadRoomImage(file, roomId);
 
             if (res.success) {
                 card.find('.cms-img').val(res.data.image_url);

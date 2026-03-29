@@ -8,5 +8,21 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 $reservationModel = new Reservation();
-$reservations = $reservationModel->getAll();
-jsonResponse(true, $reservations);
+
+$page = max(1, (int)($_GET['page'] ?? 1));
+$limit = max(1, min(100, (int)($_GET['limit'] ?? 50)));
+
+$reservations = $reservationModel->getPaginated($page, $limit);
+$total = $reservationModel->getCount();
+
+http_response_code(200);
+echo json_encode([
+    'success' => true,
+    'data' => $reservations,
+    'pagination' => [
+        'page' => $page,
+        'limit' => $limit,
+        'total' => $total,
+    ],
+]);
+exit;

@@ -4,6 +4,15 @@ class PriceCalculator
 {
     public static function calculate(float $ratePerDay, int $numDays, string $paymentType): array
     {
+        if ($ratePerDay <= 0 || $numDays <= 0) {
+            return ['success' => false, 'message' => 'Invalid rate or number of days'];
+        }
+
+        $validPaymentTypes = ['cash', 'check', 'cheque', 'credit card'];
+        if (!in_array(strtolower($paymentType), $validPaymentTypes)) {
+            return ['success' => false, 'message' => 'Unrecognized payment type'];
+        }
+
         $subtotal = $ratePerDay * $numDays;
         $discountPercent = 0;
         $surchargePercent = 0;

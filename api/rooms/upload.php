@@ -66,4 +66,17 @@ if (!move_uploaded_file($file['tmp_name'], $destination)) {
 
 $imageUrl = 'rooms/' . $filename;
 
+// Clean up old image if a room_id was provided
+$roomId = $_POST['room_id'] ?? null;
+if ($roomId) {
+    $roomModel = new Room();
+    $room = $roomModel->findById((int)$roomId);
+    if ($room && !empty($room['image_url'])) {
+        $oldFile = __DIR__ . '/../../' . $room['image_url'];
+        if (file_exists($oldFile) && is_file($oldFile)) {
+            unlink($oldFile);
+        }
+    }
+}
+
 jsonResponse(true, ['image_url' => $imageUrl], 'Image uploaded successfully');

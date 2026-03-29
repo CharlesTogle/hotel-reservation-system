@@ -10,6 +10,14 @@ const API = {
         }
         try {
             const response = await fetch(url, config);
+            if (!response.ok) {
+                try {
+                    const errorData = await response.json();
+                    return { success: false, message: errorData.message || 'Server error: ' + response.status };
+                } catch {
+                    return { success: false, message: 'Server error: ' + response.status };
+                }
+            }
             const data = await response.json();
             return data;
         } catch (error) {
@@ -55,9 +63,10 @@ const API = {
         return this.put('/api/rooms/update.php', { id, ...data });
     },
 
-    async uploadRoomImage(file) {
+    async uploadRoomImage(file, roomId) {
         const formData = new FormData();
         formData.append('image', file);
+        if (roomId) formData.append('room_id', roomId);
         try {
             const response = await fetch('/api/rooms/upload.php', {
                 method: 'POST',
@@ -76,8 +85,8 @@ const API = {
     },
 
     // Reservations
-    getReservations() {
-        return this.get('/api/reservations/index.php');
+    getReservations(page = 1, limit = 100) {
+        return this.get(`/api/reservations/index.php?page=${page}&limit=${limit}`);
     },
 
     createReservation(data) {
@@ -93,6 +102,6 @@ const API = {
     },
 
     deleteReservation(id) {
-        return this.delete('/api/reservations/delete.php', { id });
+        return this.delete('/api/reservations/delete.php?id=' + encodeURIComponent(id));
     },
 };

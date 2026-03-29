@@ -32,11 +32,19 @@ if (!$room) {
     jsonResponse(false, null, 'Room not found', 404);
 }
 
-$checkIn = new DateTime($input['check_in']);
-$checkOut = new DateTime($input['check_out']);
+try {
+    $checkIn = new DateTime($input['check_in']);
+    $checkOut = new DateTime($input['check_out']);
+} catch (Exception $e) {
+    jsonResponse(false, null, 'Invalid date format', 422);
+}
 $numDays = (int)$checkIn->diff($checkOut)->days;
 
 $pricing = PriceCalculator::calculate($room['rate_per_day'], $numDays, $input['payment_type']);
+
+if (isset($pricing['success']) && !$pricing['success']) {
+    jsonResponse(false, null, $pricing['message'], 422);
+}
 
 $reservationModel = new Reservation();
 $reservation = $reservationModel->create([

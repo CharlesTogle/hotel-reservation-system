@@ -8,7 +8,7 @@ const LoginPage = {
                     <form id="login-form">
                         <div class="form-field">
                             <label for="login-email">Email</label>
-                            <input class="input" type="email" id="login-email" placeholder="admin@hotelmemis.com" required>
+                            <input class="input" type="email" id="login-email" placeholder="Your Email" required>
                         </div>
                         <div class="form-field">
                             <label for="login-password">Password</label>
@@ -35,14 +35,20 @@ const LoginPage = {
             $btn.prop('disabled', true).text('Signing in...');
             $('#login-error').text('');
 
-            const res = await API.login(email, password);
+            try {
+                const res = await API.login(email, password);
 
-            if (res.success) {
-                Toast.success('Welcome back, ' + res.data.name + '!');
-                await Header.init();
-                window.location.hash = '#/dashboard';
-            } else {
-                $('#login-error').text(res.message);
+                if (res.success) {
+                    Toast.success('Welcome back, ' + res.data.name + '!');
+                    await Header.init();
+                    window.location.hash = '#/dashboard';
+                } else {
+                    $('#login-error').text(res.message);
+                }
+            } catch (err) {
+                $('#login-error').text('An unexpected error occurred. Please try again.');
+                console.error('Login error:', err);
+            } finally {
                 $btn.prop('disabled', false).text('Sign In');
             }
         });

@@ -41,6 +41,12 @@ class Room
             }
         }
 
+        if (array_key_exists('rate_per_day', $data)) {
+            if (!is_numeric($data['rate_per_day']) || $data['rate_per_day'] <= 0) {
+                return false;
+            }
+        }
+
         if (empty($fields)) return false;
 
         $values[] = $id;

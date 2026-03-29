@@ -242,7 +242,7 @@ const LookupPage = {
 
     showResult(r) {
         const statusClass = r.status;
-        const statusLabel = r.status.replace('_', ' ');
+        const statusLabel = r.status.replace(/_/g, ' ');
 
         let discountRow = '';
         if (Number(r.discount_amount) > 0) {
@@ -348,6 +348,15 @@ const LookupPage = {
 
         $('#lookup-result').html(html).show();
         $('#lookup-result')[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    },
+
+    cleanup() {
+        this.stopScanner();
+        $(document).off('paste.lookup');
+    },
+
+    destroy() {
+        this.cleanup();
     },
 
     escapeHtml(text) {

@@ -25,6 +25,10 @@ function jsonResponse(bool $success, $data = null, string $message = '', int $co
 
 function getJsonInput(): array
 {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $raw = file_get_contents('php://input');
+    $input = json_decode($raw, true);
+    if ($input === null && json_last_error() !== JSON_ERROR_NONE) {
+        jsonResponse(false, null, 'Invalid JSON input', 400);
+    }
     return $input ?: [];
 }

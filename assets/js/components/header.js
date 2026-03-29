@@ -44,9 +44,13 @@ const Header = {
     bindEvents() {
         $(document).off('click', '#logout-link').on('click', '#logout-link', async function (e) {
             e.preventDefault();
-            await API.logout();
+            const res = await API.logout();
             Header.currentUser = null;
-            Toast.success('Logged out successfully');
+            if (res.success) {
+                Toast.success('Logged out successfully');
+            } else {
+                Toast.error(res.message || 'Logout failed, clearing session locally');
+            }
             await Header.init();
             window.location.hash = '#/';
         });

@@ -4,7 +4,7 @@ class Validator
 {
     public static function required($value, string $field): ?string
     {
-        if (empty(trim((string)$value))) {
+        if (trim((string)$value) === '') {
             return "$field is required";
         }
         return null;
@@ -26,6 +26,14 @@ class Validator
         return null;
     }
 
+    public static function maxLength(string $value, int $max, string $field): ?string
+    {
+        if (strlen($value) > $max) {
+            return "$field must be at most $max characters";
+        }
+        return null;
+    }
+
     public static function phoneNumber(string $value): ?string
     {
         $cleaned = preg_replace('/[\s\-\(\)]/', '', $value);
@@ -37,11 +45,14 @@ class Validator
 
     public static function dateRange(string $from, string $to): ?string
     {
-        $fromDate = strtotime($from);
-        $toDate = strtotime($to);
-        $today = strtotime(date('Y-m-d'));
+        $fromDate = DateTime::createFromFormat('Y-m-d', $from);
+        $toDate = DateTime::createFromFormat('Y-m-d', $to);
+        $today = new DateTime(date('Y-m-d'));
 
-        if (!$fromDate || !$toDate) {
+        if (!$fromDate || $fromDate->format('Y-m-d') !== $from) {
+            return "Invalid date format";
+        }
+        if (!$toDate || $toDate->format('Y-m-d') !== $to) {
             return "Invalid date format";
         }
         if ($fromDate < $today) {

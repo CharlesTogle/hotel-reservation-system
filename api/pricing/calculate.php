@@ -35,6 +35,11 @@ $checkOut = new DateTime($input['check_out']);
 $numDays = (int)$checkIn->diff($checkOut)->days;
 
 $pricing = PriceCalculator::calculate($room['rate_per_day'], $numDays, $input['payment_type']);
+
+if (isset($pricing['success']) && !$pricing['success']) {
+    jsonResponse(false, null, $pricing['message'], 422);
+}
+
 $pricing['room'] = $room;
 
 jsonResponse(true, $pricing);

@@ -7,8 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
     jsonResponse(false, null, 'Method not allowed', 405);
 }
 
-$input = getJsonInput();
-$id = $input['id'] ?? null;
+$id = $_GET['id'] ?? null;
 
 if (!$id) {
     jsonResponse(false, null, 'Reservation ID is required', 422);
