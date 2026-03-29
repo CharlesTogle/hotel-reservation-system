@@ -4,164 +4,203 @@ A hotel reservation system built with vanilla PHP, SQLite, and jQuery. Guests ca
 
 ---
 
-## 1. Setup Guide
+## 1. Setup Guide (Windows)
 
 ### Option A: XAMPP Setup
 
 #### Step 1: Install XAMPP
 
-1. Download XAMPP from [https://www.apachefriends.org](https://www.apachefriends.org)
+1. Download XAMPP for Windows from [https://www.apachefriends.org](https://www.apachefriends.org)
 2. Run the installer — select at minimum **Apache** and **PHP** (MySQL is not needed since we use SQLite)
-3. Install to the default location:
-   - **Windows:** `C:\xampp`
-   - **macOS:** `/Applications/XAMPP`
-   - **Linux:** `/opt/lampp`
+3. Install to the default location: `C:\xampp`
+4. When the installer finishes, open the **XAMPP Control Panel**
 
 #### Step 2: Enable SQLite in PHP
 
-SQLite comes bundled with PHP, but you need to make sure it's enabled:
-
-**Windows:**
-1. Open `C:\xampp\php\php.ini`
-2. Find these lines and remove the `;` at the start (uncomment them):
+1. Open `C:\xampp\php\php.ini` in a text editor (Notepad, VS Code, etc.)
+2. Press `Ctrl+F` and search for `sqlite`
+3. Find these lines and remove the `;` at the start (uncomment them):
    ```ini
    extension=pdo_sqlite
    extension=sqlite3
    ```
-3. Save the file and restart Apache from the XAMPP Control Panel
-
-**macOS / Linux:**
-SQLite is typically enabled by default. Verify by running:
-```bash
-php -m | grep -i sqlite
-```
-You should see `pdo_sqlite` and `sqlite3` in the output.
+   They should look like this after editing (no semicolons):
+   ```ini
+   extension=pdo_sqlite
+   extension=sqlite3
+   ```
+4. Save the file
+5. In the XAMPP Control Panel, **Stop** and then **Start** Apache to apply the changes
 
 #### Step 3: Deploy the Project
 
-1. Copy/clone the project folder into your XAMPP `htdocs` directory:
-   - **Windows:** `C:\xampp\htdocs\ReservationSystemGabionTogle`
-   - **macOS:** `/Applications/XAMPP/htdocs/ReservationSystemGabionTogle`
-   - **Linux:** `/opt/lampp/htdocs/ReservationSystemGabionTogle`
-
-2. Make sure the `database/` folder is writable:
-   ```bash
-   chmod 755 database/
+1. Download or clone this project
+2. Copy the entire project folder into your XAMPP `htdocs` directory:
+   ```
+   C:\xampp\htdocs\ReservationSystemGabionTogle
+   ```
+   Your folder structure should look like:
+   ```
+   C:\xampp\htdocs\ReservationSystemGabionTogle\
+   ├── api\
+   ├── assets\
+   ├── classes\
+   ├── database\
+   ├── setup\
+   ├── index.php
+   ├── router.php
+   └── ...
    ```
 
 #### Step 4: Run the Migration
 
-1. Start Apache from the XAMPP Control Panel
+1. Make sure Apache is running in the XAMPP Control Panel (green highlight)
 2. Open your browser and go to:
    ```
    http://localhost/ReservationSystemGabionTogle/setup/migrate.php
    ```
-3. You should see: `Migration completed successfully!`
+3. You should see:
+   ```
+   Migration completed successfully!
+   Admin account: admin@hotelmemis.com / admin123
+   ```
 
 #### Step 5: Access the App
 
-Open:
+Open your browser and go to:
 ```
 http://localhost/ReservationSystemGabionTogle/
 ```
 
-> **Note:** When using XAMPP without the built-in PHP router, the app is served directly by Apache. All files are accessible under the `htdocs` path.
+You should see the Hotel Memis home page. You're all set!
+
+> **Note:** When using XAMPP, Apache serves the app directly from the `htdocs` folder. You don't need the `router.php` — Apache handles routing.
 
 ---
 
 ### Option B: PHP Built-in Server (CLI)
 
-This is the recommended approach for local development — it's faster and doesn't require XAMPP.
+This approach doesn't require XAMPP — you only need PHP installed on your system.
 
-#### Step 1: Install PHP
+#### Step 1: Download PHP
 
-**Windows:**
-1. Download PHP from [https://windows.php.net/download](https://windows.php.net/download) (choose the **VS16 x64 Thread Safe** zip)
-2. Extract to `C:\php`
-3. Copy `php.ini-development` to `php.ini`
-4. Open `php.ini` and uncomment:
+1. Go to [https://windows.php.net/download](https://windows.php.net/download)
+2. Under the latest PHP version (e.g., PHP 8.3), download the **VS16 x64 Thread Safe** zip file
+3. Create a folder: `C:\php`
+4. Extract the zip contents into `C:\php` so that `php.exe` is at `C:\php\php.exe`
+
+#### Step 2: Configure PHP
+
+1. In `C:\php`, find the file `php.ini-development`
+2. Copy it and rename the copy to `php.ini`
+3. Open `php.ini` in a text editor
+4. Press `Ctrl+F` and search for `extension_dir`. Find this line:
+   ```ini
+   ;extension_dir = "ext"
+   ```
+   Remove the `;` so it becomes:
    ```ini
    extension_dir = "ext"
+   ```
+5. Search for `pdo_sqlite` and `sqlite3`. Uncomment both lines:
+   ```ini
    extension=pdo_sqlite
    extension=sqlite3
    ```
-5. Add `C:\php` to your system PATH:
-   - Search "Environment Variables" in Windows
-   - Edit the `Path` variable under System Variables
-   - Add `C:\php`
-6. Verify: open a new terminal and run `php -v`
+6. Save the file
 
-**macOS:**
-```bash
-# PHP comes pre-installed, or install via Homebrew:
-brew install php
-```
+#### Step 3: Add PHP to System PATH
 
-**Linux (Ubuntu/Debian):**
-```bash
-sudo apt update
-sudo apt install php php-sqlite3
-```
+1. Press `Win + S` and search for **"Environment Variables"**
+2. Click **"Edit the system environment variables"**
+3. Click the **"Environment Variables..."** button
+4. Under **System Variables**, find and select **Path**, then click **Edit**
+5. Click **New** and add:
+   ```
+   C:\php
+   ```
+6. Click **OK** on all dialogs to save
 
-**Linux (Arch):**
-```bash
-sudo pacman -S php
-```
-SQLite is compiled into PHP by default on Arch.
+#### Step 4: Verify PHP Installation
 
-#### Step 2: Verify SQLite Support
+1. Open a **new** Command Prompt or PowerShell window (must be new so PATH updates take effect)
+2. Run:
+   ```cmd
+   php -v
+   ```
+   You should see something like:
+   ```
+   PHP 8.3.x (cli) (built: ...)
+   ```
+3. Verify SQLite is enabled:
+   ```cmd
+   php -m
+   ```
+   Scroll through the list — you should see `pdo_sqlite` and `sqlite3`.
 
-```bash
-php -m | grep -i sqlite
-```
+#### Step 5: Run the Migration
 
-Expected output:
-```
-pdo_sqlite
-sqlite3
-```
+1. Open Command Prompt or PowerShell
+2. Navigate to the project folder:
+   ```cmd
+   cd C:\path\to\ReservationSystemGabionTogle
+   ```
+3. Run the migration:
+   ```cmd
+   php setup/migrate.php
+   ```
+4. You should see:
+   ```
+   Migration completed successfully!
+   Admin account: admin@hotelmemis.com / admin123
+   ```
 
-If `pdo_sqlite` is missing, enable it in your `php.ini` file.
+#### Step 6: Start the Server
 
-#### Step 3: Run the Migration
-
-From the project root:
-```bash
-php setup/migrate.php
-```
-
-Output:
-```
-Migration completed successfully!
-Admin account: admin@hotelmemis.com / admin123
-```
-
-#### Step 4: Start the Server
-
-From the project root:
-```bash
+From the project folder, run:
+```cmd
 php -S localhost:8000 router.php
 ```
+
+You should see:
+```
+PHP 8.3.x Development Server (http://localhost:8000) started
+```
+
+> **Keep this terminal window open** — closing it stops the server.
 
 The `router.php` file handles:
 - Serving static files (CSS, JS, images)
 - Routing API requests to the correct PHP endpoint
 - Serving the SPA shell (`index.php`) for all other routes
 
-#### Step 5: Access the App
+#### Step 7: Access the App
 
-Open:
+Open your browser and go to:
 ```
 http://localhost:8000
 ```
 
+You should see the Hotel Memis home page. You're all set!
+
 ---
+
+### Troubleshooting (Windows)
+
+| Problem | Solution |
+|---------|----------|
+| `'php' is not recognized as an internal or external command` | PHP is not in your PATH. Re-do Step 3 of Option B, and make sure to open a **new** terminal window after editing PATH. |
+| `Migration completed` but the app shows a blank page | Make sure you're accessing the correct URL. For XAMPP: `http://localhost/ReservationSystemGabionTogle/`. For CLI: `http://localhost:8000`. |
+| `could not find driver` error | SQLite extensions are not enabled. Open your `php.ini` and make sure `extension=pdo_sqlite` and `extension=sqlite3` are uncommented (no `;` at the start). |
+| `extension_dir` errors or DLL not found | Make sure `extension_dir = "ext"` is uncommented in `php.ini` (Option B only). |
+| Port 8000 already in use | Use a different port: `php -S localhost:9000 router.php` and then visit `http://localhost:9000`. |
+| XAMPP Apache won't start | Another program (like Skype or IIS) may be using port 80. In XAMPP, click **Config** on Apache → change `Listen 80` to `Listen 8080` in `httpd.conf`, then access via `http://localhost:8080/ReservationSystemGabionTogle/`. |
 
 ### Database Location
 
 The SQLite database file is stored at:
 ```
-database/database.sqlite
+database\database.sqlite
 ```
 
 It is created automatically when you run the migration. To reset the database, delete this file and re-run the migration.
