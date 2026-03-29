@@ -216,6 +216,8 @@ It is created automatically when you run the migration. To reset the database, d
 3. Each room card shows the image, type, description, and daily rate
 4. Client clicks **"Reserve Now"** to start booking
 
+![Home Page](screenshots/01-home.png)
+
 ### Making a Reservation
 
 1. Navigate to `#/reservation`
@@ -247,6 +249,8 @@ It is created automatically when you run the migration. To reset the database, d
    - Error message is displayed
    - Form state is preserved so the client can adjust
 
+![Reservation Page](screenshots/03-reservation.png)
+
 ### Looking Up a Reservation
 
 1. Navigate to `#/lookup`
@@ -270,6 +274,18 @@ Reservation details can be accessed directly via:
 ```
 This auto-fills the token and performs the lookup immediately.
 
+![Reservation Lookup](screenshots/05-lookup.png)
+
+### Other Pages
+
+**Company Profile** (`#/company`)
+
+![Company Profile](screenshots/02-company.png)
+
+**Contacts** (`#/contacts`)
+
+![Contacts](screenshots/04-contacts.png)
+
 ---
 
 ## 3. Admin Flows
@@ -282,6 +298,8 @@ This auto-fills the token and performs the lookup immediately.
    - **Password:** `admin123`
 3. On success: redirected to the admin dashboard
 4. The navigation bar updates to show **Dashboard** and **Log Out**
+
+![Admin Login](screenshots/06-login.png)
 
 ### Dashboard — Reservations Tab
 
@@ -302,6 +320,8 @@ This auto-fills the token and performs the lookup immediately.
    - Confirm in the modal dialog
    - Table and stats refresh after deletion
 
+![Dashboard - Reservations](screenshots/08-dashboard-reservations.png)
+
 ### Dashboard — Manage Rooms Tab
 
 1. Click the **"Manage Rooms"** tab
@@ -314,6 +334,8 @@ This auto-fills the token and performs the lookup immediately.
 3. After uploading an image, the old image file is automatically cleaned up from disk
 4. Click **"Save Changes"** to persist edits to the database
 5. Changes are reflected immediately on the public-facing pages
+
+![Dashboard - Manage Rooms](screenshots/09-dashboard-rooms.png)
 
 ### Logging Out
 
