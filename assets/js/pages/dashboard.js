@@ -214,8 +214,22 @@ const DashboardPage = {
                                 <textarea class="input cms-desc" rows="2">${this.escapeHtml(room.description)}</textarea>
                             </div>
                             <div class="form-field">
-                                <label>Image URL</label>
-                                <input type="text" class="input cms-img" value="${this.escapeHtml(room.image_url)}">
+                                <label>Image</label>
+                                <div class="cms-image-toggle">
+                                    <button type="button" class="toggle-btn active" data-mode="url">Image URL</button>
+                                    <button type="button" class="toggle-btn" data-mode="upload">Upload Image</button>
+                                </div>
+                                <div class="cms-image-url">
+                                    <input type="text" class="input cms-img" value="${this.escapeHtml(room.image_url)}">
+                                </div>
+                                <div class="cms-image-upload" style="display:none;">
+                                    <label class="upload-area">
+                                        <input type="file" class="cms-file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,image/bmp,image/tiff" hidden>
+                                        <span class="upload-text">Click to choose an image</span>
+                                        <span class="upload-hint">PNG, JPG, WebP, GIF, SVG, BMP, TIFF — max 10MB</span>
+                                    </label>
+                                    <div class="upload-status"></div>
+                                </div>
                             </div>
                             <button class="btn small cms-save" data-id="${room.id}">Save Changes</button>
                         </div>
@@ -227,10 +241,67 @@ const DashboardPage = {
         html += '</div>';
         $('#dash-content').html(html);
 
+        // Toggle between URL and Upload
+        $(document).off('click', '.toggle-btn').on('click', '.toggle-btn', function () {
+            const card = $(this).closest('.cms-card');
+            const mode = $(this).data('mode');
+            card.find('.toggle-btn').removeClass('active');
+            $(this).addClass('active');
+            if (mode === 'url') {
+                card.find('.cms-image-url').show();
+                card.find('.cms-image-upload').hide();
+            } else {
+                card.find('.cms-image-url').hide();
+                card.find('.cms-image-upload').show();
+            }
+        });
+
         // Live image preview on URL change
         $(document).off('input', '.cms-img').on('input', '.cms-img', function () {
             const card = $(this).closest('.cms-card');
             card.find('.cms-image').css('background-image', `url('${$(this).val()}')`);
+        });
+
+        // File upload handler
+        $(document).off('change', '.cms-file').on('change', '.cms-file', async function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            const card = $(this).closest('.cms-card');
+            const statusEl = card.find('.upload-status');
+            const uploadText = card.find('.upload-text');
+
+            // Client-side validation
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml', 'image/bmp', 'image/tiff'];
+            if (!allowedTypes.includes(file.type)) {
+                Toast.error('Invalid file type. Use PNG, JPG, WebP, GIF, SVG, BMP, or TIFF.');
+                $(this).val('');
+                return;
+            }
+
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                Toast.error('File too large. Maximum size is 10MB.');
+                $(this).val('');
+                return;
+            }
+
+            uploadText.text('Uploading...');
+            statusEl.html('<span style="color:var(--accent-600);">Uploading...</span>');
+
+            const res = await API.uploadRoomImage(file);
+
+            if (res.success) {
+                card.find('.cms-img').val(res.data.image_url);
+                card.find('.cms-image').css('background-image', `url('${res.data.image_url}')`);
+                uploadText.text(file.name);
+                statusEl.html('<span style="color:var(--success);">Uploaded! Click Save Changes to apply.</span>');
+                Toast.success('Image uploaded!');
+            } else {
+                uploadText.text('Click to choose an image');
+                statusEl.html(`<span style="color:var(--danger);">${res.message}</span>`);
+                Toast.error(res.message || 'Upload failed');
+            }
         });
 
         // Save handler

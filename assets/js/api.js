@@ -55,6 +55,21 @@ const API = {
         return this.put('/api/rooms/update.php', { id, ...data });
     },
 
+    async uploadRoomImage(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+        try {
+            const response = await fetch('/api/rooms/upload.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData,
+            });
+            return await response.json();
+        } catch (error) {
+            return { success: false, message: 'Upload failed. Please try again.' };
+        }
+    },
+
     // Pricing
     calculatePrice(data) {
         return this.post('/api/pricing/calculate.php', data);

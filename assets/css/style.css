@@ -789,6 +789,68 @@ tr:hover td {
     resize: vertical;
 }
 
+.cms-image-toggle {
+    display: flex;
+    gap: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(17, 56, 54, 0.18);
+    width: fit-content;
+}
+
+.toggle-btn {
+    padding: 6px 16px;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: rgba(11, 42, 42, 0.5);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.toggle-btn.active {
+    background: var(--deep-800);
+    color: var(--sand-100);
+}
+
+.upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    border: 2px dashed rgba(17, 56, 54, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: center;
+}
+
+.upload-area:hover {
+    border-color: var(--accent-600);
+    background: rgba(180, 138, 73, 0.06);
+}
+
+.upload-text {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--deep-800);
+}
+
+.upload-hint {
+    font-size: 0.72rem;
+    color: rgba(11, 42, 42, 0.45);
+    margin-top: 4px;
+}
+
+.upload-status {
+    font-size: 0.78rem;
+    margin-top: 6px;
+}
+
 .cms-save {
     align-self: flex-end;
     margin-top: 4px;
